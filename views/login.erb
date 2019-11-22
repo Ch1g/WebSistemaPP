@@ -1,0 +1,23 @@
+<h2> Авторизация </h2>
+
+<form class="form-inline" action="/login" method="POST">
+  <div class="form-group">
+    <input  id="login" class="form-control" type="text" name="login" placeholder="Имя пользователя" />
+  </div>
+  <div class="form-group">
+    <input id="password" class="form-control" type="password" name="password" placeholder="Пароль" />
+  </div>
+  <div class="checkbox">
+    <label>
+      <input type="checkbox"> Запомнить меня
+    </label>
+  </div>
+  <input type="submit" class="btn btn-primary" value="Войти">
+</form>
+<% if @access then%>
+  <div class="alert alert-danger" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Ошибка:</span>
+    <%= @access %>
+  </div>
+<% end %>

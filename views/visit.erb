@@ -1,0 +1,23 @@
+
+<h2>Заявка на ТО павильона:</h2>
+<form action="/visit" method="POST">
+  <div class="form-group">
+    <label for="defecttype">Укажите тип неисправности:</label>
+    <select id="defecttype" class="form-control" name="defecttype">
+      <option>Сантехника</option>
+      <option>Электрика</option>
+      <option>Ремонт</option>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="defectinfo">Кратко опишите проблему:</label>
+    <textarea id="defectinfo" class="form-control" rows="3" name="defectinfo" placeholder="Информация"></textarea>
+  </div>
+    <% if @submit then %>
+  <div class="alert <%=@type %>" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <%= @message %>
+  </div>
+    <% end %>
+  <input type="submit" class="btn btn-primary" value="Отправить заявку" />
+</form>
