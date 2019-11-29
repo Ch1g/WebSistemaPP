@@ -34,9 +34,6 @@ post '/visit' do
 	else
 		@message = "Спасибо! Ваша заявка принята в обработку."
     @type = "alert-success"
-		f = File.open './public/main.txt', 'a'
-		f.write "#{DateTime.now}: Тип неисправности: #{@visithash[:defecttype]}, Описание: #{@visithash[:defectinfo]}\n"
-		f.close
   end
 	erb :visit
 end
