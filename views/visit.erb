@@ -2,16 +2,24 @@
 <h2>Заявка на ТО павильона:</h2>
 <form action="/visit" method="POST">
   <div class="form-group">
-    <label for="defecttype">Укажите тип неисправности:</label>
-    <select id="defecttype" class="form-control" name="defecttype">
-      <option>Сантехника</option>
-      <option>Электрика</option>
-      <option>Ремонт</option>
+    <label for="Defect_Select">Укажите тип неисправности:</label>
+    <select type="text" id="Defect_Select" class="form-control" name="Defect_Select">
+      <% @defect.each do |item| %>
+        <option><%="#{item["ID_Type"]}. #{item["Type_Name"]}"%></option>
+      <%end%>
     </select>
   </div>
   <div class="form-group">
-    <label for="defectinfo">Кратко опишите проблему:</label>
-    <textarea id="defectinfo" class="form-control" rows="3" name="defectinfo" placeholder="Информация"></textarea>
+    <label for="Pavilion_Select">Select pavilion:</label>
+    <select id="Pavilion_Select" class="form-control" name="Pavilion_Select">
+      <% @pavilions.each do |item| %>
+        <option><%="#{item["ID_Pavilion"]}. #{item["Pavilion_Num"]}"%></option>
+      <%end%>
+    </select>
+  </div>
+  <div class="form-group">
+    <label for="Defect_Descr">Кратко опишите проблему:</label>
+    <textarea id="Defect_Descr" class="form-control" rows="3" name="Defect_Descr" placeholder="Информация"></textarea>
   </div>
     <% if @submit then %>
   <div class="alert <%=@type %>" role="alert">

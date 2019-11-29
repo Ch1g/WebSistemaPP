@@ -5,3 +5,4 @@ database/blohstreet.db
 Gemfile.lock
 .gitignore
 Gemfile.lock
+db/schema.rb

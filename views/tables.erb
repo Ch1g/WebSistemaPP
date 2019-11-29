@@ -1,0 +1,221 @@
+<h2>Работа с данными</h2>
+<form action="/tables" method="POST">
+  <label for="select">Выберите таблицу:</label>
+  <div class="btn-group">
+    <button id="select" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <%=@table %>  <span class="caret"></span>
+    </button>
+    <ul class="dropdown-menu">
+      <% @tables.each do |item| %>
+          <li><a href="/tables/<%=item["name"] %>"><%=item["name"]%></a></li>
+    <% end %>
+    </ul>
+  </div>
+  <div class="form-group">
+    <%if @table == "pavilions" then %>
+    <label name="table_name">Павильоны</label>
+    <table class="table table-hover table-bordered text-center">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Площадь</th>
+        <th>Количество этажей</th>
+        <th>Номер</th>
+        <th colspan="2" class="text-center">Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+    <% @glob.each do |row| %>
+      <tr>
+        <td><%= row.id_pavilion %></td>
+        <td><%= row.square %></td>
+        <td><%= row.floors %></td>
+        <td><%= row.number %></td>
+        <td><a href="/tables/<%=@table%>/<%=row.id_pavilion%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+        <td><a href="/tables/<%=@table%>/<%=row.id_pavilion%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+      </tr>
+    <% end %>
+    </tbody>
+    </table>
+    <%end %>
+    <%if @table == "defects" then %>
+      <label name="table_name">Типы неисправностей</label>
+      <table class="table table-hover table-bordered text-center">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Тип</th>
+          <th colspan="2" class="text-center">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @glob.each do |row| %>
+          <tr>
+            <td><%= row.id_defect %></td>
+            <td><%= row.defect_name %></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_defect%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_defect%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+    <%end %>
+      <%if @table == "users" then %>
+      <label name="table_name">Пользователи</label>
+      <table class="table table-hover table-bordered text-center">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Логин</th>
+          <th>Пароль</th>
+          <th>Роль</th>
+          <th>Имя</th>
+          <th>Фамилия</th>
+          <th>Отчество</th>
+          <th>Контактный номер</th>
+          <th>Должность</th>
+          <th>Павильон</th>
+          <th colspan="2" class="text-center">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @glob.each do |row| %>
+          <tr>
+            <td><%= row.id_user %></td>
+            <td><%= row.login %></td>
+            <td><%= row.password %></td>
+            <td><%= CRUD::Role.find(row.role).name %></td>
+            <td><%= row.name %></td>
+            <td><%= row.surname %></td>
+            <td><%= row.patronymic %></td>
+            <td><%= row.phone %></td>
+            <td><%= CRUD::Post.find(row.post).name %></td>
+            <td><%= CRUD::Pavilion.find(row.pavilion).number %></td>
+
+            <td><a href="/tables/<%=@table%>/<%=row.id_user%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_user%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+      <%end %>
+      <%if @table == "maintenances" then %>
+      <label name="table_name">Заявки на обслуживание</label>
+      <table class="table table-hover table-bordered text-center">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Заказчик</th>
+          <th>Статус выполнения</th>
+          <th>Исполнитель</th>
+          <th>Дата подачи</th>
+          <th>Дата выполнения</th>
+          <th>Тип неисправности</th>
+          <th>Комментарий</th>
+          <th colspan="2" class="text-center">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @glob.each do |row| %>
+          <tr>
+            <td><%= row.id_maintenance %></td>
+            <td><%=client = CRUD::User.find(row.client); "#{client.name} #{client.surname}, #{client.phone}" %></td>
+            <td><%= CRUD::Status.find(row.status).name %></td>
+            <td><%=executor = CRUD::User.find(row.executor); "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" %></td>
+            <td><%= row.bid_date %></td>
+            <td><%= row.end_date %></td>
+            <td><%= CRUD::Defect.find(row.defect).defect_name %></td>
+            <td><%= row.description %></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_maintenance%>/update" role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_maintenance%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+      <%end %>
+      <%if @table == "statuses" then %>
+      <label name="table_name">Статусы заявок</label>
+      <table class="table table-hover table-bordered text-center">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Статус</th>
+          <th colspan="2" class="text-center">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @glob.each do |row| %>
+          <tr>
+            <td><%= row.id_status %></td>
+            <td><%= row.name %></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_status%>/update" role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_status%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+      <%end %>
+      <%if @table == "posts" then %>
+      <label name="table_name">Должности</label>
+      <table class="table table-hover table-bordered text-center">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Должность</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @glob.each do |row| %>
+          <tr>
+            <td><%= row.id_post %></td>
+            <td><%= row.name %></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_post%>/update" role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_post%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+      <%end %>
+      <%if @table == "roles" then %>
+      <label name="table_name">Роли</label>
+      <table class="table table-hover table-bordered text-center">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Роль</th>
+          <th>Доступ к таблице 'defects'</th>
+          <th>Доступ к таблице 'maintenances'</th>
+          <th>Доступ к таблице 'pavilions'</th>
+          <th>Доступ к таблице 'posts'</th>
+          <th>Доступ к таблице 'statuses'</th>
+          <th colspan="2" class="text-center">Действия</th>
+        </tr>
+        </thead>
+        <tbody>
+        <% @glob.each do |row| %>
+          <tr>
+            <td><%= row.id_role %></td>
+            <td><%= row.name %></td>
+            <td><%= row.defect %></td>
+            <td><%= row.maintenance %></td>
+            <td><%= row.pavilion %></td>
+            <td><%= row.post %></td>
+            <td><%= row.status %></td>
+
+            <td><a href="/tables/<%=@table%>/<%=row.id_role%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=@table%>/<%=row.id_role%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+          </tr>
+        <% end %>
+        </tbody>
+      </table>
+      <%end %>
+    <% if $message then%>
+      <div class="alert <%=$message[1] %>" role="alert">
+        <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+        <span class="sr-only"></span>
+        <%= $message[0] %>
+      </div>
+    <% end %>
+    <a type="submit" href="/tables/<%=@table%>/new" class="btn btn-primary center-block">Добавить запись</a>
+  </div>
+</form>
