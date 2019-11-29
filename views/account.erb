@@ -1,12 +1,129 @@
-<h2>Account</h2>
-<form>
-  <div class="form-group">
-    <ul>
-      <li><p>Name: <%=@user[0]["Name"] %></p></li>
-      <li><p>Surname: <%=@user[0]["Surname"] %></p></li>
-      <li><p>Patronymic: <%=@user[0]["Patronymic"] %></p></li>
-      <li><p>Login: <%=@user[0]["User_Login"] %></p></li>
-      <li><p>Role: <%=@role[0]["Role_Name"] %></p></li>
-    </ul>
+<hr>
+<div class="container bootstrap snippet">
+  <div class="row">
+    <div class="col-sm-10">
+      <h1><%=session[:identity] %></h1></div>
   </div>
-</form>
+  <div class="row">
+    <div class="col-sm-3">
+      <!--left col-->
+      <% user = CRUD::User.find_by(login: session[:identity])%>
+      <ul class="list-group">
+        <li class="list-group-item text-muted">Profile</li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong>Настоящее имя</strong></span> <%="#{user.name} #{user.surname}" %> </li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong>Телефон</strong></span> <%=user.phone%></li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong>Должность</strong></span> <%=CRUD::Post.find(user.post).name %></li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong>Павильон №</strong></span> <%=CRUD::Pavilion.find(user.post).number %></li>
+      </ul>
+
+
+      <ul class="list-group">
+        <%if CRUD::Role.find(user.role).name == 'Клиент' %>
+          <li class="list-group-item text-muted">Ваши заявки <i class="fa fa-dashboard fa-1x"></i></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>Все</strong></span> <%=CRUD::Maintenance.where(client: user.id_user).count %></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>Новые</strong></span> <%=CRUD::Maintenance.where(client: user.id_user, status: CRUD::Status.find_by(name: 'Не готово').id_status).count %></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>Готовые</strong></span> <%=CRUD::Maintenance.where(client: user.id_user, status: CRUD::Status.find_by(name: 'Готово').id_status).count %></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>В исполнении</strong></span> <%=CRUD::Maintenance.where(client: user.id_user, status: CRUD::Status.find_by(name: 'В исполнении').id_status).count %></li>
+          <% end %>
+          <%if CRUD::Role.find(user.role).name == 'Исполнитель' %>
+            <li class="list-group-item text-muted">Ваши назначения <i class="fa fa-dashboard fa-1x"></i></li>
+            <li class="list-group-item text-right"><span class="pull-left"><strong>Все</strong></span> <%=CRUD::Maintenance.where(executor: user.id_user).count %></li>
+            <li class="list-group-item text-right"><span class="pull-left"><strong>В исполнении</strong></span> <%=CRUD::Maintenance.where(executor: user.id_user, status: CRUD::Status.find_by(name: 'В исполнении').id_status).count %></li>
+            <li class="list-group-item text-right"><span class="pull-left"><strong>Готовые</strong></span> <%=CRUD::Maintenance.where(executor: user.id_user, status: CRUD::Status.find_by(name: 'Готово').id_status).count %></li>
+            <% end %>
+        <%if CRUD::Role.find(user.role).name == 'Менеджер по заявкам' %>
+          <li class="list-group-item text-muted">Заявки на ТО <i class="fa fa-dashboard fa-1x"></i></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>Все</strong></span> <%=CRUD::Maintenance.all.count %></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>Готовые</strong></span> <%=CRUD::Maintenance.where(status: CRUD::Status.find_by(name: 'Готово').id_status).count %></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>Не назначены</strong></span> <%=CRUD::Maintenance.where(status: CRUD::Status.find_by(name: 'Не готово').id_status).count %></li>
+          <li class="list-group-item text-right"><span class="pull-left"><strong>В исполнении</strong></span> <%=CRUD::Maintenance.where(status: CRUD::Status.find_by(name: 'В исполнении').id_status).count %></li>
+        <% end %>
+      </ul>
+
+    </div>
+    <!--/col-3-->
+    <div class="col-sm-9">
+
+      <ul class="nav nav-tabs" id="myTab">
+        <li <%=@last == 'Bids' ? 'class = "active"' : '' %>><a href="#messages" data-toggle="tab">Управление заявками</a></li>
+        <li <%=@last == 'Settings' ? 'class = "active"' : '' %>><a href="#settings" data-toggle="tab">Управление аккаунтом</a></li>
+      </ul>
+
+      <div class="tab-content">
+        <div class="tab-pane <%=@last == 'Bids' ? 'active' : '' %>" id="messages">
+
+          <h2></h2>
+
+          <ul class="list-group">
+            <li class="list-group-item text-muted">Inbox</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">Here is your a link to the latest summary report from the..</a> 2.13.2014</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">Hi Joe, There has been a request on your account since that was..</a> 2.11.2014</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">Nullam sapien massaortor. A lobortis vitae, condimentum justo...</a> 2.11.2014</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">Thllam sapien massaortor. A lobortis vitae, condimentum justo...</a> 2.11.2014</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">Wesm sapien massaortor. A lobortis vitae, condimentum justo...</a> 2.11.2014</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">For therepien massaortor. A lobortis vitae, condimentum justo...</a> 2.11.2014</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">Also we, havesapien massaortor. A lobortis vitae, condimentum justo...</a> 2.11.2014</li>
+            <li class="list-group-item text-right"><a href="#" class="pull-left">Swedish chef is assaortor. A lobortis vitae, condimentum justo...</a> 2.11.2014</li>
+
+          </ul>
+
+        </div>
+        <!--/tab-pane-->
+        <div class="tab-pane <%=@last == 'Settings' ? 'active' : '' %>" id="settings">
+
+          <hr>
+          <form class="form" action="/account" method="post" id="SettingsForm">
+            <div class="form-group form-inline">
+
+              <div class="col-xs-12">
+                <label for="current_password">
+                  <h4>Действующий пароль: </h4></label>
+                <input type="password" class="form-control" name="current_password" id="current_password" placeholder="Действующий пароль" title="Введите действующий пароль">
+                <br/><br/>
+              </div>
+            </div>
+            <div class="form-group">
+
+              <div class="col-xs-3">
+                <label for="new_password">
+                  <h4>Новый пароль</h4></label>
+                <input type="password" class="form-control" name="new_password" id="new_password" placeholder="Новый пароль" title="Введите новый пароль">
+              </div>
+            </div>
+
+            <div class="form-group">
+
+              <div class="col-xs-3">
+                <label for="new_password2">
+                  <h4>Повторите</h4></label>
+                <input type="password" class="form-control" name="new_password2" id="new_password2" placeholder="Повторите ввод" title="Введите новый пароль еще раз">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="col-xs-12">
+                <br>
+                <button class="btn btn-lg btn-success" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Save</button>
+                <button class="btn btn-lg" type="reset"><i class="glyphicon glyphicon-repeat"></i> Reset</button>
+              </div>
+            </div>
+
+            <% if @message then%>
+              <div class="col-xs-12 alert <%=@message[0]%>" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only"></span>
+                <%= @message[1] %>
+              </div>
+            <% end %>
+          </form>
+        </div>
+
+      </div>
+      <!--/tab-pane-->
+    </div>
+    <!--/tab-content-->
+
+  </div>
+  <!--/col-9-->
+</div>
+<!--/row-->

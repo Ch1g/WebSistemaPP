@@ -95,8 +95,36 @@ get '/about' do
   erb :about
 end
 
+get '/account' do
+	if session[:identity]
+		erb :account
+	else
+		redirect to '/login'
+	end
+
+end
+
 get '/visit' do
   erb :visit
+end
+
+post '/account' do
+	if username == 'Hello stranger'
+		erb :login
+  else
+    if params[:current_password] != CRUD::User.find_by(login: username).password
+      @message = ['alert-danger', 'Текущий пароль указан неверно']
+		elsif !(6..16).include? params[:new_password].length
+			@message = ['alert-danger', 'Пароль должен содержать от 6 до 16 символов']
+    elsif params[:new_password] != params[:new_password2]
+			@message = ['alert-danger', 'Пароли не совпадают']
+    else
+      @message = ['alert-success', 'Пароль успешно изменен']
+      CRUD::User.update(CRUD::User.find_by(login: username).id_user, password: params[:new_password])
+    end
+    @last = "Settings"
+    erb :account
+    end
 end
 
 post '/visit' do
@@ -127,9 +155,7 @@ end
 
 
 post '/login' do
-	pass = @db.execute "select password, login from User where User_login = ?", params[:login]
-	@db.close
-	if  params[:pass] == pass[0]["password"] && params[:login] == pass[0]["login"]
+	if  params[:pass] == CRUD::User.find_by(login: params[:login]).password
 		session[:identity] = params[:login]
 		erb "<div class='alert alert-success text-center'>Авторизация успешна!</div>"
 	else
