@@ -13,7 +13,7 @@
         <li class="list-group-item text-right"><span class="pull-left"><strong>Настоящее имя</strong></span> <%="#{user.name} #{user.surname}" %> </li>
         <li class="list-group-item text-right"><span class="pull-left"><strong>Телефон</strong></span> <%=user.phone%></li>
         <li class="list-group-item text-right"><span class="pull-left"><strong>Должность</strong></span> <%=CRUD::Post.find(user.post).name %></li>
-        <li class="list-group-item text-right"><span class="pull-left"><strong>Павильон №</strong></span> <%=CRUD::Pavilion.find(user.post).number %></li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong>Павильон №</strong></span> <%=CRUD::Pavilion.find(user.pavilion).number %></li>
       </ul>
 
 

@@ -145,6 +145,99 @@ get '/tables/:table/new' do
 	erb :insert
 end
 
+post '/tables/:table/new' do
+  @table = params[:table]
+  case @table
+  when 'pavilions'
+    @reload = {square: params[:Pavilion_Square], floors: params[:Pavilion_Floors], number: params[:Pavilion_Num]}
+    if CRUD::Pavilion.find_by(number: @reload[:number])
+      @message = ['alert-danger','Данный номер павильона уже используется в базе!']
+    elsif params[:Pavilion_Square] == '' or params[:Pavilion_Floors] == '' or params[:Pavilion_Num] == ''
+      @message = ['alert-danger','Необходимо заполнить все поля!']
+    else
+      CRUD::Pavilion.create @reload
+			@reload = {}
+			@message = ['alert-success','Запись успешно добавлена!']
+    end
+  when 'defects'
+		@reload = {defect_name: params[:Defect_Type]}
+		if CRUD::Defect.find_by(defect_name: @reload[:defect_name])
+			@message = ['alert-danger','Данный тип уже существует в базе!']
+		elsif @reload[:defect_name] == ''
+			@message = ['alert-danger','Необходимо заполнить поле!']
+		else
+			CRUD::Defect.create @reload
+			@reload = {}
+			@message = ['alert-success','Запись успешно добавлена!']
+    end
+	when 'posts'
+		@reload = {name: params[:Post_Name]}
+		if CRUD::Post.find_by(name: @reload[:name])
+			@message = ['alert-danger','Данная должность уже существует в базе!']
+		elsif @reload[:name] == ''
+			@message = ['alert-danger','Необходимо заполнить поле!']
+		else
+			CRUD::Post.create @reload
+			@reload = {}
+			@message = ['alert-success','Запись успешно добавлена!']
+    end
+	when 'roles'
+		@reload = {name: params[:Role_Name], defect: params[:Defect_T]? true : false,
+               status: params[:Status_T]? true : false, maintenance: params[:Main_T]? true : false,
+               pavilion: params[:Status_T]? true : false, post: params[:Post_T]? true : false}
+		if CRUD::Role.find_by(name: @reload[:name])
+			@message = ['alert-danger','Данная роль уже существует в базе!']
+		elsif @reload[:name] == ''
+			@message = ['alert-danger','Необходимо заполнить поле!']
+		else
+			CRUD::Role.create @reload
+			@reload = {}
+			@message = ['alert-success','Запись успешно добавлена!']
+    end
+	when 'statuses'
+		@reload = {name: params[:Status_Name]}
+		if CRUD::Status.find_by(name: @reload[:name])
+			@message = ['alert-danger','Данный статус уже существует в базе!']
+		elsif @reload[:name] == ''
+			@message = ['alert-danger','Необходимо заполнить поле!']
+		else
+			CRUD::Status.create @reload
+      @reload = {}
+			@message = ['alert-success','Запись успешно добавлена!']
+    end
+	when 'users'
+		@reload = {login: params[:User_Login], password: params[:User_Password], role: params[:Role_Select].split[0].chomp, name: params[:User_Name],
+               surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split[0].chomp,
+               pavilion: params[:Pavilion_Select].split[0].chomp}
+		if CRUD::User.find_by(login: @reload[:login])
+      @message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
+    elsif CRUD::User.find_by(phone: @reload[:phone])
+			@message = ['alert-danger','Введенный вами номер телефона уже используется!']
+		elsif	(6..16).include? @reload[:password]
+			@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
+		else
+			CRUD::User.create @reload
+			@reload = {}
+			@message = ['alert-success','Запись успешно добавлена!']
+    end
+		@reload.each_key { |key| @reload[key] == ''? @message = ['alert-danger','Необходимо заполнить все поля!'] : ''}
+  when 'maintenances'
+    @reload = {status: params[:Status_Select].split[0].chomp, executor: params[:Executor_Select].split[0].chomp,
+               client: params[:Client_Select].split[0].chomp, bid_date: params[:Date_Bid], end_date: params[:Date_End],
+               defect: params[:Defect_Select].split[0].chomp, description: params[:Maintenance_Descr]}
+    if @reload[:bid_date] == ''
+			@message = ['alert-danger','Дата и время подачи заявки должны быть указаны!']
+    elsif @reload[:description] == '' or @reload[:description].length > 255
+			@message = ['alert-danger','Описание не должно быть пустым или превышать 255 символов!']
+    else
+			CRUD::Maintenance.create @reload
+			@reload = {}
+			@message = ['alert-success','Запись успешно добавлена!']
+    end
+  end
+  erb :insert
+end
+
 get '/login' do
 	if session[:identity]
 		erb "<div class='alert alert-danger text-center'>Вы уже авторизованы!</div>"
