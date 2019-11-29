@@ -40,7 +40,7 @@ class CreateBase < ActiveRecord::Migration[6.0]
 
     create_table :users, primary_key: :id_user do |t|
       t.string :login, limit: 16, null: false
-      t.string :password, limit: 16, null: false
+      t.string :password, null: false
       t.integer :role, null: false
       t.string :name, limit: 30
       t.string :surname, limit: 30
