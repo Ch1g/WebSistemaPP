@@ -1,0 +1,162 @@
+<h2>Table "<%=@table %>" new data row</h2>
+<form action="/tables/<%=@table %>/new" method="POST">
+  <%if @table == "Pavilion"%>
+    <div class="form-group">
+      <label for="Pavilion_Square">Square: </label>
+      <input type="text" id="Pavilion_Square" class="form-control" name="Pavilion_Square" placeholder="Square">
+    </div>
+    <div class="form-group">
+      <label for="Pavilion_Floors">Floors: </label>
+      <input type="text" id="Pavilion_Floors" class="form-control" name="Pavilion_Floors" placeholder="Floors">
+    </div>
+    <div class="form-group">
+      <label for="Pavilion_Num">Number: </label>
+      <input type="text" id="Pavilion_Num" class="form-control" name="Pavilion_Num" placeholder="Number">
+    </div>
+  <% end %>
+  <% if @table == "Defect" %>
+    <div class="form-group">
+      <label for="Defect_Type">Type: </label>
+      <input type="text" id="Defect_Type" class="form-control" name="Defect_Type" placeholder="Type">
+    </div>
+  <% end %>
+  <% if @table == "Post" %>
+    <div class="form-group">
+      <label for="Post_Name">Name: </label>
+      <input type="text" id="Post_Name" class="form-control" name="Post_Name" placeholder="Type">
+    </div>
+  <% end %>
+  <% if @table == "Role" %>
+    <div class="form-group">
+      <label for="Role_Name">Type: </label>
+      <input type="text" id="Role_Name" class="form-control" name="Role_Name" placeholder="Type">
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" name="Defect_T"> Defect table access
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" name="Main_T"> Maintenance table access
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1"  name="Pavilion_T"> Pavilion table access
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" name="Post_T"> Post table access
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" name="Status_T"> Status table access
+        </label>
+      </div>
+    </div>
+  <% end %>
+  <% if @table == "Status" %>
+    <div class="form-group">
+      <label for="Status_Name">Name: </label>
+      <input type="text" id="Status_Name" class="form-control" name="Status_Name" placeholder="Status">
+    </div>
+  <% end %>
+  <% if @table == "users" %>
+    <div class="form-group">
+      <label for="User_Login">Login: </label>
+      <input type="text" id="User_Login" class="form-control" name="User_Login" placeholder="Login">
+    </div>
+    <div class="form-group">
+      <label for="User_Password">Password: </label>
+      <input type="text" id="User_Password" class="form-control" name="User_Password" placeholder="Password">
+    </div>
+    <div class="form-group">
+      <label for="Role_Select">Select role:</label>
+      <select id="Role_Select" class="form-control" name="Role_Select">
+        <% CRUD::Role.all.each do |item| %>
+          <option><%="#{item.id_role}. #{item.name}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="User_Name">Name: </label>
+      <input type="text" id="User_Name" class="form-control" name="User_Name" placeholder="Name">
+    </div>
+    <div class="form-group">
+      <label for="User_Surname">Surname: </label>
+      <input type="text" id="User_Surname" class="form-control" name="User_Surname" placeholder="Surname">
+    </div>
+    <div class="form-group">
+      <label for="User_Patronymic">Patronymic: </label>
+      <input type="text" id="User_Patronymic" class="form-control" name="User_Patronymic" placeholder="Patronymic">
+    </div>
+    <div class="form-group">
+      <label for="User_Phone">Phone number: </label>
+      <input type="text" id="User_Phone" class="form-control" name="User_Phone" placeholder="Phone number">
+    </div>
+    <div class="form-group">
+      <label for="Post_Select">Select Post:</label>
+      <select id="Post_Select" class="form-control" name="Post_Select">
+        <% CRUD::Post.all.each do |item| %>
+          <option><%="#{item.id_post}. #{item.name}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Pavilion_Select">Select pavilion:</label>
+      <select id="Pavilion_Select" class="form-control" name="Pavilion_Select">
+        <% CRUD::Pavilion.all.each do |item| %>
+          <option><%="#{item.id_pavilion}. #{item.number}"%></option>
+        <%end%>
+      </select>
+    </div>
+  <% end %>
+  <% if @table == "Maintenance" %>
+    <div class="form-group">
+      <label for="Pavilion_Select">Select pavilion: </label>
+      <select type="text" id="Pavilion_Select" class="form-control" name="Pavilion_Select">
+        <% @pavilions.each do |item| %>
+          <option><%="#{item["ID_Pavilion"]}. #{item["Pavilion_Num"]}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Status_Select">Select status: </label>
+      <select type="text" id="Status_Select" class="form-control" name="Status_Select">
+        <% @status.each do |item| %>
+          <option><%="#{item["ID_Status"]}. #{item["Status_Name"]}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Executor_Select">Select executor:</label>
+      <select id="Executor_Select" class="form-control" name="Executor_Select">
+        <% @users.each do |item| %>
+          <option><%="#{item["ID_User"]}. #{item["Name"]} #{item["Surname"]} - #{item["Post_Name"]}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Date_Bid">Date of bid: </label>
+      <input type="text" id="Date_Bid" class="form-control" name="Date_Bid" placeholder="Name">
+    </div>
+    <div class="form-group">
+      <label for="Date_End">Date of end: </label>
+      <input type="text" id="Date_End" class="form-control" name="Date_End" placeholder="Surname">
+    </div>
+    <div class="form-group">
+      <label for="Maintenance_Descr">Description: </label>
+      <textarea id="Maintenance_Descr" class="form-control" rows="3" name="Maintenance_Descr" placeholder="Defect description"></textarea>
+    </div>
+  <% end %>
+  <% if @message %>
+    <div class="alert alert-danger" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Error:</span>
+      <%= @message %>
+    </div>
+  <% end %>
+  <input type="submit" href="/tables/<%=@table%>/new" class="btn btn-primary center-block" value="Add">
+</form>
