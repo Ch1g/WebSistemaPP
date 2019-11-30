@@ -25,7 +25,7 @@
       </tr>
     </thead>
     <tbody>
-    <% @glob.each do |row| %>
+    <% CRUD::Pavilion.all.each do |row| %>
       <tr>
         <td><%= row.id_pavilion %></td>
         <td><%= row.square %></td>
@@ -49,7 +49,7 @@
         </tr>
         </thead>
         <tbody>
-        <% @glob.each do |row| %>
+        <% CRUD::Defect.all.each do |row| %>
           <tr>
             <td><%= row.id_defect %></td>
             <td><%= row.defect_name %></td>
@@ -79,7 +79,7 @@
         </tr>
         </thead>
         <tbody>
-        <% @glob.each do |row| %>
+        <% CRUD::User.all.each do |row| %>
           <tr>
             <td><%= row.id_user %></td>
             <td><%= row.login %></td>
@@ -116,7 +116,7 @@
         </tr>
         </thead>
         <tbody>
-        <% @glob.each do |row| %>
+        <% CRUD::Maintenance.all.each do |row| %>
           <tr>
             <td><%= row.id_maintenance %></td>
             <td><%=client = CRUD::User.find(row.client); "#{client.name} #{client.surname}, #{client.phone}" %></td>
@@ -144,7 +144,7 @@
         </tr>
         </thead>
         <tbody>
-        <% @glob.each do |row| %>
+        <% CRUD::Status.all.each do |row| %>
           <tr>
             <td><%= row.id_status %></td>
             <td><%= row.name %></td>
@@ -165,7 +165,7 @@
         </tr>
         </thead>
         <tbody>
-        <% @glob.each do |row| %>
+        <% CRUD::Post.all.each do |row| %>
           <tr>
             <td><%= row.id_post %></td>
             <td><%= row.name %></td>
@@ -192,7 +192,7 @@
         </tr>
         </thead>
         <tbody>
-        <% @glob.each do |row| %>
+        <% CRUD::Role.all.each do |row| %>
           <tr>
             <td><%= row.id_role %></td>
             <td><%= row.name %></td>

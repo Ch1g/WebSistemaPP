@@ -1,4 +1,3 @@
-<hr>
 <div class="container bootstrap snippet">
   <div class="row">
     <div class="col-sm-10">
@@ -9,7 +8,7 @@
       <!--left col-->
       <% user = CRUD::User.find_by(login: session[:identity])%>
       <ul class="list-group">
-        <li class="list-group-item text-muted">Profile</li>
+        <li class="list-group-item text-muted">Профиль</li>
         <li class="list-group-item text-right"><span class="pull-left"><strong>Настоящее имя</strong></span> <%="#{user.name} #{user.surname}" %> </li>
         <li class="list-group-item text-right"><span class="pull-left"><strong>Телефон</strong></span> <%=user.phone%></li>
         <li class="list-group-item text-right"><span class="pull-left"><strong>Должность</strong></span> <%=CRUD::Post.find(user.post).name %></li>
@@ -58,8 +57,13 @@
         </div>
         <!--/tab-pane-->
         <div class="tab-pane <%=@last == 'Settings' ? 'active' : '' %>" id="settings">
-
-          <hr>
+          <% if @message then%>
+            <div class="col-xs-12 alert <%=@message[0]%>" role="alert">
+              <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+              <span class="sr-only"></span>
+              <%= @message[1] %>
+            </div>
+          <% end %>
           <form class="form" action="/account" method="post" id="SettingsForm">
             <div class="form-group form-inline">
 
@@ -95,21 +99,10 @@
                 <button class="btn" type="reset"><i class="glyphicon glyphicon-repeat"></i> Сброс</button>
               </div>
             </div>
-
-            <% if @message then%>
-              <div class="col-xs-12 alert <%=@message[0]%>" role="alert">
-                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
-                <span class="sr-only"></span>
-                <%= @message[1] %>
-              </div>
-            <% end %>
           </form>
         </div>
-
       </div>
-      <!--/tab-pane-->
     </div>
-    <!--/tab-content-->
 
   </div>
   <!--/col-9-->

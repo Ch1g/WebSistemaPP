@@ -63,46 +63,20 @@ post '/registration' do
 end
 
 get '/tables/:value' do
-	if session[:identity]
-		$message[2] ? $message[2] = false : $message = nil if $message
+	if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
+    $message && $message[2] ? $message[2] = false : $message = nil
 		get_db
     @table = params[:value]
-		case CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name
-			when 'Администратор'
-			@tables = @db.execute "SELECT name FROM sqlite_master
+    @tables = @db.execute "SELECT name FROM sqlite_master
 								WHERE type='table'
 								and name != 'sqlite_sequence'
 								and name != 'schema_migrations'
 								and name != 'ar_internal_metadata'
 								ORDER BY name;"
-    when 'Менеджер по заявкам'
-			@tables = @db.execute "SELECT name FROM sqlite_master
-								WHERE type = 'table'
-								and name = 'maintenances'
-								ORDER BY name;"
+		@db.close
     else
 			redirect to not_found
     end
-    @db.close
-  else
-    redirect to not_found
-	end
-	case @table
-  when 'pavilions'
-    @glob = CRUD::Pavilion.all
-  when 'defects'
-    @glob = CRUD::Defect.all
-  when 'maintenances'
-    @glob = CRUD::Maintenance.all
-  when 'posts'
-    @glob = CRUD::Post.all
-  when 'roles'
-    @glob = CRUD::Role.all
-  when 'statuses'
-    @glob = CRUD::Status.all
-  when 'users'
-    @glob = CRUD::User.all
-  end
 	erb :tables
 end
 
@@ -111,26 +85,19 @@ get '/tables/:table/:id/delete' do
 	id = params[:id]
   case table
   when 'pavilions'
-    pavilionfk = CRUD::User.find_by(pavilion: id)
-		pavilionfk ? success = false : CRUD::Pavilion.find(id).delete
+    CRUD::User.find_by(pavilion: id) ? success = false : CRUD::Pavilion.find(id).delete
   when 'defects'
-    defectfk = CRUD::Maintenance.find_by(defect: id)
-		defectfk ? success = false : CRUD::Defect.find(id).delete
+    CRUD::Maintenance.find_by(defect: id) ? success = false : CRUD::Defect.find(id).delete
 	when 'maintenances'
 		CRUD::Maintenance.find(id).delete
   when 'posts'
-    postfk = CRUD::User.find_by(post: id)
-		postfk ? success = false : CRUD::Post.find(id).delete
+    CRUD::User.find_by(post: id) ? success = false : CRUD::Post.find(id).delete
   when 'roles'
-    rolefk = CRUD::User.find_by(role: id)
-		rolefk ? success = false : CRUD::Role.find(id).delete
+    CRUD::User.find_by(role: id) ? success = false : CRUD::Role.find(id).delete
   when 'statuses'
-    statusfk = CRUD::Maintenance.find_by(status: id)
-		statusfk ? success = false : CRUD::Status.find(id).delete
+    CRUD::Maintenance.find_by(status: id) ? success = false : CRUD::Status.find(id).delete
 	when 'users'
-		clientfk = CRUD::Maintenance.find_by(client: id )
-    execfk = CRUD::Maintenance.find_by(executor: id )
-    clientfk or execfk ? success = false : CRUD::User.find(id).delete
+		CRUD::Maintenance.find_by(client: id ) || CRUD::Maintenance.find_by(executor: id ) ? success = false : CRUD::User.find(id).delete
     end
   if success == nil
 		$message = ["Запись успешно удалена!",
@@ -290,7 +257,6 @@ post '/tables/:table/new' do
 			@message = ['alert-success','Запись успешно добавлена!']
     end
   end
-  p @reload
   erb :insert
 end
 
