@@ -9,6 +9,10 @@ configure do
 	enable :sessions
 end
 
+not_found do
+  erb :not_found
+end
+
 helpers do
 	def username
 		session[:identity] ? session[:identity] : 'Hello stranger'
@@ -25,15 +29,30 @@ get '/' do
 end
 
 get '/tables/:value' do
-  $message[2] ? $message[2] = false : $message = nil if $message
-  get_db
-	@table = params[:value]
-	@tables = @db.execute "SELECT name FROM sqlite_master
-            WHERE type='table'
-						and name != 'sqlite_sequence'
-					 	and name != 'schema_migrations'
-						and name != 'ar_internal_metadata'
-            ORDER BY name;"
+	if session[:identity]
+		$message[2] ? $message[2] = false : $message = nil if $message
+		get_db
+    @table = params[:value]
+		case CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name
+			when 'Клиент'
+        redirect to not_found
+			when 'Администратор'
+			@tables = @db.execute "SELECT name FROM sqlite_master
+								WHERE type='table'
+								and name != 'sqlite_sequence'
+								and name != 'schema_migrations'
+								and name != 'ar_internal_metadata'
+								ORDER BY name;"
+    when 'Менеджер по заявкам'
+			@tables = @db.execute "SELECT name FROM sqlite_master
+								WHERE type = 'table'
+								and name = 'maintenances'
+								ORDER BY name;"
+    end
+    @db.close
+  else
+    redirect to not_found
+	end
 	case @table
   when 'pavilions'
     @glob = CRUD::Pavilion.all
@@ -50,7 +69,6 @@ get '/tables/:value' do
   when 'users'
     @glob = CRUD::User.all
   end
-	@db.close
 	erb :tables
 end
 
@@ -128,14 +146,14 @@ post '/account' do
 end
 
 post '/visit' do
-  @visithash = {defecttype: params[:defecttype], defectinfo: params[:defectinfo]}
-	@submit = true
-	if @visithash[:defectinfo] == ''
-		@message = "Заполните все поля!"
-    @type = "alert-danger"
-	else
-		@message = "Спасибо! Ваша заявка принята в обработку."
-    @type = "alert-success"
+  @reload = {defect: params[:Defect_Select].split[0].chomp, description: params[:Defect_Descr],
+             client: CRUD::User.find_by(login: session[:identity]).id_user, bid_date: DateTime.now.strftime("%Y-%m-%d %H:%M:%S"),
+             status: CRUD::Status.find_by(name: 'Не готово').id_status}
+	if @reload[:defectinfo] == ''
+		@message = ["alert-danger", "Заполните информацию о неисправности!"]
+  else
+    CRUD::Maintenance.create @reload
+		@message = ["alert-success", "Спасибо! Ваша заявка принята в обработку."]
   end
 	erb :visit
 end
@@ -375,5 +393,5 @@ get '/logout' do
 	else
 		session.delete(:identity)
 		erb "<div class='alert alert-success text-center'>До свидания!</div>"
-	end
+  end
 end
