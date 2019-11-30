@@ -1,0 +1,165 @@
+<h2>Изменение данных в таблице "<%=@table %>"</h2>
+<form action="/tables/<%=@table %>/<%=@id %>/update" method="POST">
+  <%if @table == "pavilions"%>
+    Номер павильона: <label name="Role_Name"><%=@reload[:number]%></label>
+    <div class="form-group">
+      <label for="Pavilion_Square">Площадь: </label>
+      <input type="number" id="Pavilion_Square" <%= @reload ? "value='#{@reload[:square]}'" : ''%> class="form-control" name="Pavilion_Square" placeholder="Square">
+    </div>
+    <div class="form-group">
+      <label for="Pavilion_Floors">Этажи: </label>
+      <input type="number" id="Pavilion_Floors" <%= @reload ? "value='#{@reload[:floors]}'" : ''%> class="form-control" name="Pavilion_Floors" placeholder="Floors">
+    </div>
+  <% end %>
+  <% if @table == "defects" %>
+    <div class="form-group">
+      <label for="Defect_Type">Тип неисправности: </label>
+      <input type="text" id="Defect_Type" <%= @reload ? "value='#{@reload[:defect_name]}'" : ''%> class="form-control" name="Defect_Type" placeholder="Type">
+    </div>
+  <% end %>
+  <% if @table == "posts" %>
+    <div class="form-group">
+      <label for="Post_Name">Название должности: </label>
+      <input type="text" id="Post_Name" <%= @reload ? "value='#{@reload[:name]}'" : ''%> class="form-control" name="Post_Name" placeholder="Type">
+    </div>
+  <% end %>
+  <% if @table == "roles" %>
+    <div class="form-group">
+      Название роли: <label name="Role_Name"><%=@reload[:name]%></label>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" <%=@reload[:defect]? 'checked' : '' %> name="Defect_T"> Доступ к таблице 'defects'
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" <%=@reload[:maintenance]? 'checked' : '' %> name="Main_T"> Доступ к таблице 'maintenances'
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" <%=@reload[:pavilion] ? 'checked' : '' %> name="Pavilion_T"> Доступ к таблице 'pavilions'
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" <%=@reload[:post] ? 'checked' : '' %> name="Post_T"> Доступ к таблице 'posts'
+        </label>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" value="1" <%=@reload[:status] ? 'checked' : '' %> name="Status_T"> Доступ к таблице 'statuses'
+        </label>
+      </div>
+    </div>
+  <% end %>
+  <% if @table == "statuses" %>
+    <div class="form-group">
+      <label for="Status_Name">Статус: </label>
+      <input type="text" id="Status_Name" <%= @reload ? "value='#{@reload[:name]}'" : ''%> class="form-control" name="Status_Name" placeholder="Status">
+    </div>
+  <% end %>
+  <% if @table == "users" %>
+    <div class="form-group">
+      Логин: <label name="User_Login"><%=@reload[:login] %></label>
+    </div>
+    <div class="form-group">
+      <label for="User_Password">Пароль: </label>
+      <input type="password" id="User_Password" class="form-control" <%= @reload ? "value='#{@reload[:password]}'" : ''%> name="User_Password" placeholder="Password">
+    </div>
+    <div class="form-group">
+      <label for="Role_Select">Выберите роль:</label>
+      <select id="Role_Select" class="form-control" name="Role_Select">
+        <% CRUD::Role.all.each do |item| %>
+          <option <%=@reload && @reload[:role].to_i == item.id_role ? ' selected' : ''%>><%="#{item.id_role}. #{item.name}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="User_Name">Имя: </label>
+      <input type="text" id="User_Name" class="form-control" <%= @reload ? "value='#{@reload[:name]}'" : ''%> name="User_Name" placeholder="Name">
+    </div>
+    <div class="form-group">
+      <label for="User_Surname">Фамилия: </label>
+      <input type="text" id="User_Surname" class="form-control" <%= @reload ? "value='#{@reload[:surname]}'" : ''%> name="User_Surname" placeholder="Surname">
+    </div>
+    <div class="form-group">
+      <label for="User_Patronymic">Отчество: </label>
+      <input type="text" id="User_Patronymic" class="form-control" <%= @reload ? "value='#{@reload[:patronymic]}'" : ''%> name="User_Patronymic" placeholder="Patronymic">
+    </div>
+    <div class="form-group">
+      <label for="User_Phone">Контактный телефон: </label>
+      <input type="text" id="User_Phone" class="form-control" <%= @reload ? "value='#{@reload[:phone]}'" : ''%> name="User_Phone" placeholder="Phone number">
+    </div>
+    <div class="form-group">
+      <label for="Post_Select">Выберите должность:</label>
+      <select id="Post_Select" class="form-control" name="Post_Select">
+        <% CRUD::Post.all.each do |item| %>
+          <option <%=@reload && @reload[:post].to_i == item.id_post ? 'selected' : ''%>><%="#{item.id_post}. #{item.name}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Pavilion_Select">Выберите павильон:</label>
+      <select id="Pavilion_Select" class="form-control" name="Pavilion_Select">
+        <% CRUD::Pavilion.all.each do |item| %>
+          <option <%=@reload && @reload[:pavilion].to_i == item.id_pavilion ? 'selected' : ''%>><%="#{item.id_pavilion}. Павильон №#{item.number}"%></option>
+        <%end%>
+      </select>
+    </div>
+  <% end %>
+  <% if @table == "maintenances" %>
+    <div class="form-group">
+      <label for="Status_Select">Выберите статус: </label>
+      <select type="text" id="Status_Select" class="form-control" name="Status_Select">
+        <% CRUD::Status.all.each do |item| %>
+          <option <%=@reload && @reload[:status].to_i == item.id_status ? 'selected' : ''%>><%="#{item.id_status}. #{item.name}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Client_Select">Выберите заказчика:</label>
+      <select id="Client_Select" class="form-control" name="Client_Select">
+        <% CRUD::User.where(role: CRUD::Role.find_by(name: "Клиент").id_role).each do |item| %>
+          <option <%=@reload && @reload[:client].to_i == item.id_user ? 'selected' : ''%>><%="#{item.id_user}. #{item.name} #{item.surname} - Павильон №#{CRUD::Pavilion.find(item.pavilion).number}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Defect_Select">Выберите тип неисправности:</label>
+      <select id="Defect_Select" class="form-control" name="Defect_Select">
+        <% CRUD::Defect.all.each do |item| %>
+          <option <%=@reload && @reload[:defect].to_i == item.id_defect ? 'selected' : ''%>><%="#{item.id_defect}. #{item.defect_name}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Executor_Select">Выберите исполнителя:</label>
+      <select id="Executor_Select" class="form-control" name="Executor_Select">
+        <% CRUD::User.where(role: CRUD::Role.find_by(name: "Исполнитель").id_role).each do |item| %>
+          <option <%=@reload && @reload[:executor].to_i == item.id_user ? 'selected' : ''%>><%="#{item.id_user}. #{item.name} #{item.surname} - #{CRUD::Post.find(item.post).name}"%></option>
+        <%end%>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="Date_Bid">Дата подачи: </label>
+      <input type="text" id="Date_Bid" class="form-control" <%= @reload ? "value='#{@reload[:date_bid]}'" : ''%> name="Date_Bid" placeholder="Дата подачи заявки">
+    </div>
+    <div class="form-group">
+      <label for="Date_End">Дата выполнения: </label>
+      <input type="text" id="Date_End" class="form-control" <%= @reload ? "value='#{@reload[:date_end]}'" : ''%> name="Date_End" placeholder="Дата выполнения заявки">
+    </div>
+    <div class="form-group">
+      <label for="Maintenance_Descr">Описание: </label>
+      <textarea id="Maintenance_Descr" class="form-control" <%= @reload ? "value='#{@reload[:description]}'" : ''%> rows="3" name="Maintenance_Descr" placeholder="Описание неисправности"></textarea>
+    </div>
+  <% end %>
+  <% if @message %>
+    <div class="alert <%=@message[0] %>" role="alert">
+      <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+      <span class="sr-only">Ошибка:</span>
+      <%= @message[1] %>
+    </div>
+  <% end %>
+  <input type="submit" href="/tables/<%=@table%>/new" class="btn btn-primary center-block" value="Изменить">
+</form>
