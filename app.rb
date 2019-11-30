@@ -41,17 +41,18 @@ post '/registration' do
              name: params[:User_Name], surname: params[:User_Surname], patronymic: params[:User_Patronymic],
              phone: params[:User_Phone], post: CRUD::Post.find_by(name: 'Клиент').id_post,
 						 pavilion: params[:Pavilion_Select].split[0].chomp('.')}
-	if @reload[:login] == '' or @reload[:password] == '' or @reload[:name] == '' or @reload[:surname] == '' or @reload[:patronymic] == '' or @reload[:phone] == ''
+  case
+  when @reload[:login] == ''||@reload[:password] == ''||@reload[:name] == ''||@reload[:surname] == ''||@reload[:patronymic] == ''||@reload[:phone] == ''
 		@message = ['alert-danger','Необходимо заполнить все поля!']
-	elsif CRUD::User.find_by(phone: @reload[:phone])
+  when CRUD::User.find_by(phone: @reload[:phone])
 		@message = ['alert-danger','Введенный вами номер телефона уже используется!']
-	elsif 16 < params[:User_Login].length
+  when 16 < params[:User_Login].length
 		@message = ['alert-danger','Имя пользователя должно содержать не более 16 символов']
-	elsif CRUD::User.find_by(login: @reload[:login])
+  when CRUD::User.find_by(login: @reload[:login])
 		@message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
-	elsif	(6..16).include? params[:User_Password]
+  when	((6..16).include? params[:User_Password])
 		@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
-  elsif params[:User_Password] != params[:User_Password2]
+  when params[:User_Password] != params[:User_Password2]
 		@message = ['alert-danger','Пароли не совпадают!']
 	else
 		CRUD::User.create @reload
@@ -163,11 +164,12 @@ post '/account' do
 	if username == 'Hello stranger'
 		erb :login
   else
-    if params[:current_password] != CRUD::User.find_by(login: username).password
+    case
+    when params[:current_password] != CRUD::User.find_by(login: username).password
       @message = ['alert-danger', 'Текущий пароль указан неверно']
-		elsif !(6..16).include? params[:new_password].length
+    when !((6..16).include? params[:new_password].length)
 			@message = ['alert-danger', 'Пароль должен содержать от 6 до 16 символов']
-    elsif params[:new_password] != params[:new_password2]
+    when params[:new_password] != params[:new_password2]
 			@message = ['alert-danger', 'Пароли не совпадают']
     else
       @message = ['alert-success', 'Пароль успешно изменен']
@@ -260,13 +262,14 @@ post '/tables/:table/new' do
 		@reload = {login: params[:User_Login], password: params[:User_Password], role: params[:Role_Select].split[0].chomp('.'), name: params[:User_Name],
                surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split[0].chomp('.'),
                pavilion: params[:Pavilion_Select].split[0].chomp('.')}
-    if @reload[:login] == '' or @reload[:password] == '' or @reload[:name] == '' or @reload[:surname] == '' or @reload[:patronymic] == '' or @reload[:phone] == ''
+    case
+  	when @reload[:login] == '' || @reload[:password] == '' || @reload[:name] == '' || @reload[:surname] == '' || @reload[:patronymic] == '' || @reload[:phone] == ''
       @message = ['alert-danger','Необходимо заполнить все поля!']
-    elsif CRUD::User.find_by(login: @reload[:login])
+    when CRUD::User.find_by(login: @reload[:login])
       @message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
-    elsif CRUD::User.find_by(phone: @reload[:phone])
+    when CRUD::User.find_by(phone: @reload[:phone])
 			@message = ['alert-danger','Введенный вами номер телефона уже используется!']
-		elsif	(6..16).include? @reload[:password]
+    when	((6..16).include? @reload[:password])
 			@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
 		else
 			CRUD::User.create @reload
@@ -352,8 +355,14 @@ post '/tables/:table/:id/update' do
 		@reload = {password: params[:User_Password], role: params[:Role_Select].split[0].chomp('.'), name: params[:User_Name],
 							 surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split[0].chomp('.'),
 							 pavilion: params[:Pavilion_Select].split[0].chomp('.')}
-		@reload.each_key { |key| @reload[key] == '' ? @message = ['alert-danger','Необходимо заполнить все поля!'] : ''}
-		if	(6..16).include? @reload[:password]
+    case
+		when @reload[:login] == '' || @reload[:password] == '' || @reload[:name] == '' || @reload[:surname] == '' || @reload[:patronymic] == '' || @reload[:phone] == ''
+			@message = ['alert-danger','Необходимо заполнить все поля!']
+		when CRUD::User.find_by(login: @reload[:login])
+			@message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
+		when CRUD::User.find_by(phone: @reload[:phone])
+			@message = ['alert-danger','Введенный вами номер телефона уже используется!']
+		when	((6..16).include? @reload[:password])
 			@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
 		else
 			CRUD::User.update(@id, @reload)

@@ -6,3 +6,5 @@ Gemfile.lock
 .gitignore
 Gemfile.lock
 db/schema.rb
+public/jquery.simplecolorpicker.js
+public/jquery.simplecolorpicker.css
