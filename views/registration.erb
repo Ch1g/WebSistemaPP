@@ -1,0 +1,84 @@
+<h2>Регистрация нового пользователя</h2>
+<% if @message %>
+  <div class="alert <%=@message[0] %>" role="alert">
+    <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+    <span class="sr-only">Ошибка:</span>
+    <%= @message[1] %>
+  </div>
+<% end %>
+<form class="form" action="/registration" method="POST">
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="first_name">
+        <h4>Имя</h4></label>
+      <input type="text" class="form-control" <%= @reload ? "value='#{@reload[:name]}'" : ''%> name="User_Name" placeholder="Имя" title="Введите имя">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="last_name">
+        <h4>Фамилия</h4></label>
+      <input type="text" class="form-control" <%= @reload ? "value='#{@reload[:surname]}'" : ''%> name="User_Surname" placeholder="Фамилия" title="Введите фамилию">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="phone">
+        <h4>Отчество</h4></label>
+      <input type="text" class="form-control" <%= @reload ? "value='#{@reload[:patronymic]}'" : ''%> name="User_Patronymic" placeholder="Отчество" title="Введите отчество">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="mobile">
+        <h4>Телефон</h4></label>
+      <input type="text" class="form-control" <%= @reload ? "value='#{@reload[:phone]}'" : ''%> name="User_Phone" placeholder="Контактный телефон" title="Введите контактный телефон">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="Pavilion_Select"><h4>Выберите павильон:</h4></label>
+      <select id="Pavilion_Select" class="form-control" name="Pavilion_Select">
+        <% CRUD::Pavilion.all.each do |item| %>
+          <option <%=@reload && @reload[:pavilion].to_i == item.id_pavilion ? 'selected' : ''%>><%="#{item.id_pavilion}. Павильон №#{item.number}"%></option>
+        <%end%>
+      </select>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="email">
+        <h4>Логин</h4></label>
+      <input type="text" class="form-control" <%= @reload ? "value='#{@reload[:login]}'" : ''%> name="User_Login" placeholder="Логин" title="Введите имя пользователя">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="password">
+        <h4>Пароль</h4></label>
+      <input type="password" class="form-control" <%= @reload ? "value='#{@reload[:password]}'" : ''%> name="User_Password" id="password" placeholder="Пароль" title="Введите пароль">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-6">
+      <label for="password2">
+        <h4>Повторите ввод</h4></label>
+      <input type="password" class="form-control" name="User_Password2" id="password2" placeholder="Повторите пароль" title="Повторите пароль">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <div class="col-xs-12">
+      <br>
+      <button class="btn btn-lg btn-success center-block" type="submit"><i class="glyphicon glyphicon-ok-sign"></i> Зарегистрироваться</button>
+    </div>
+  </div>
+
+</form>

@@ -22,7 +22,7 @@
 
 			<!-- Static navbar -->
 			<nav class="navbar navbar-inverse" id="navigator" role="navigation">
-			  <div class="navbar-default">
+			  <div class="navbar-nav container-fluid">
 			    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
 			      <span class="sr-only">Toggle navigation</span>
 			      <span class="icon-bar"></span>
@@ -35,7 +35,7 @@
 			    <ul class="navbar-nav nav">
 						<li><a href="/about">Информация</a></li>
 						<%= session[:identity] && CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Клиент' ? '<li><a href="/visit">Оставить заявку</a></li>' : '' %>
-						<li><a href="/account">Профиль</a> </li>
+						<%=session[:identity] ? '<li><a href="/account">Профиль</a> </li>' : '' %>
 						<%= session[:identity] && CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name != 'Клиент' ? '<li><a href="/tables/pavilions">Данные</a></li>' : ''%>
 			    </ul>
 					<ul class="nav navbar-nav navbar-right">
@@ -45,9 +45,13 @@
 								<span class="caret"></span>
 							</a>
 							<ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-								<li><a href="/login">Login</a></li>
-								<li role="separator" class="divider"></li>
-								<li><a href="/logout">Logout</a></li>
+								<%if !session[:identity] then %>
+									<li><a href="/login">Войти</a></li>
+									<li role="separator" class="divider"></li>
+									<li><a href="/registration">Зарегистрироваться</a></li>
+								<%else %>
+									<li><a href="/logout">Выйти</a></li>
+								<%end %>
 							</ul>
 						</li>
 					</ul>

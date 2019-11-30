@@ -15,7 +15,7 @@ end
 
 helpers do
 	def username
-		session[:identity] ? session[:identity] : 'Hello stranger'
+		session[:identity] ? session[:identity] : 'Гость'
 	end
 
 	def get_db
@@ -25,7 +25,40 @@ helpers do
 end
 
 get '/' do
-	erb "<h2>Hello!</h2><p>Добро пожаловать!</p>"
+	erb "<h2 class = 'text-center'>Hello!</h2><p class = 'text-center'>Добро пожаловать!</p>"
+end
+
+get '/registration' do
+	if session[:identity]
+		erb "<div class='alert alert-danger text-center'>Вы уже авторизованы! Вам это не нужно! </div>"
+	else
+		erb :registration
+	end
+end
+
+post '/registration' do
+	@reload = {login: params[:User_Login], password: params[:User_Password], role: CRUD::Role.find_by(name: 'Клиент').id_role,
+             name: params[:User_Name], surname: params[:User_Surname], patronymic: params[:User_Patronymic],
+             phone: params[:User_Phone], post: CRUD::Post.find_by(name: 'Клиент').id_post,
+						 pavilion: params[:Pavilion_Select].split[0].chomp('.')}
+	if @reload[:login] == '' or @reload[:password] == '' or @reload[:name] == '' or @reload[:surname] == '' or @reload[:patronymic] == '' or @reload[:phone] == ''
+		@message = ['alert-danger','Необходимо заполнить все поля!']
+	elsif CRUD::User.find_by(phone: @reload[:phone])
+		@message = ['alert-danger','Введенный вами номер телефона уже используется!']
+	elsif 16 < params[:User_Login].length
+		@message = ['alert-danger','Имя пользователя должно содержать не более 16 символов']
+	elsif CRUD::User.find_by(login: @reload[:login])
+		@message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
+	elsif	(6..16).include? params[:User_Password]
+		@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
+  elsif params[:User_Password] != params[:User_Password2]
+		@message = ['alert-danger','Пароли не совпадают!']
+	else
+		CRUD::User.create @reload
+		@reload = {}
+		@message = ['alert-success','Регистрация успешна!']
+  end
+  erb :registration
 end
 
 get '/tables/:value' do
@@ -34,8 +67,6 @@ get '/tables/:value' do
 		get_db
     @table = params[:value]
 		case CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name
-			when 'Клиент'
-        redirect to not_found
 			when 'Администратор'
 			@tables = @db.execute "SELECT name FROM sqlite_master
 								WHERE type='table'
@@ -48,6 +79,8 @@ get '/tables/:value' do
 								WHERE type = 'table'
 								and name = 'maintenances'
 								ORDER BY name;"
+    else
+			redirect to not_found
     end
     @db.close
   else
@@ -227,8 +260,9 @@ post '/tables/:table/new' do
 		@reload = {login: params[:User_Login], password: params[:User_Password], role: params[:Role_Select].split[0].chomp('.'), name: params[:User_Name],
                surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split[0].chomp('.'),
                pavilion: params[:Pavilion_Select].split[0].chomp('.')}
-		@reload.each_key { |key| @reload[key] == '' ? @message = ['alert-danger','Необходимо заполнить все поля!'] : ''}
-    if CRUD::User.find_by(login: @reload[:login])
+    if @reload[:login] == '' or @reload[:password] == '' or @reload[:name] == '' or @reload[:surname] == '' or @reload[:patronymic] == '' or @reload[:phone] == ''
+      @message = ['alert-danger','Необходимо заполнить все поля!']
+    elsif CRUD::User.find_by(login: @reload[:login])
       @message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
     elsif CRUD::User.find_by(phone: @reload[:phone])
 			@message = ['alert-danger','Введенный вами номер телефона уже используется!']
@@ -382,9 +416,6 @@ post '/login' do
 		@access = "Неверное имя пользователя или пароль"
 		erb :login
 	end
-rescue
-	@access = "Неверное имя пользователя или пароль"
-	erb :login
 end
 
 get '/logout' do
