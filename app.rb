@@ -50,7 +50,7 @@ post '/registration' do
 		@message = ['alert-danger','Имя пользователя должно содержать не более 16 символов']
   when CRUD::User.find_by(login: @reload[:login])
 		@message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
-  when	((6..16).include? params[:User_Password])
+  when	!((6..16).include? params[:User_Password].length)
 		@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
   when params[:User_Password] != params[:User_Password2]
 		@message = ['alert-danger','Пароли не совпадают!']
@@ -63,7 +63,9 @@ post '/registration' do
 end
 
 get '/tables/:value' do
-	if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
+  if !session[:identity]
+    erb :login
+  elsif CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
     $message && $message[2] ? $message[2] = false : $message = nil
 		get_db
     @table = params[:value]
@@ -74,30 +76,29 @@ get '/tables/:value' do
 								and name != 'ar_internal_metadata'
 								ORDER BY name;"
 		@db.close
-    else
-			redirect to not_found
-    end
-	erb :tables
+    erb :tables
+  else
+    erb :not_found
+   end
 end
 
 get '/tables/:table/:id/delete' do
-  table = params[:table]
-	id = params[:id]
-  case table
+  if session[:identity]&&CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
+  case params[:table]
   when 'pavilions'
-    CRUD::User.find_by(pavilion: id) ? success = false : CRUD::Pavilion.find(id).delete
+    CRUD::User.find_by(pavilion: params[:id]) ? success = false : CRUD::Pavilion.find(params[:id]).delete
   when 'defects'
-    CRUD::Maintenance.find_by(defect: id) ? success = false : CRUD::Defect.find(id).delete
+    CRUD::Maintenance.find_by(defect: params[:id]) ? success = false : CRUD::Defect.find(params[:id]).delete
 	when 'maintenances'
-		CRUD::Maintenance.find(id).delete
+		CRUD::Maintenance.find(params[:id]).delete
   when 'posts'
-    CRUD::User.find_by(post: id) ? success = false : CRUD::Post.find(id).delete
+    CRUD::User.find_by(post: params[:id]) ? success = false : CRUD::Post.find(params[:id]).delete
   when 'roles'
-    CRUD::User.find_by(role: id) ? success = false : CRUD::Role.find(id).delete
+    CRUD::User.find_by(role: params[:id]) ? success = false : CRUD::Role.find(params[:id]).delete
   when 'statuses'
-    CRUD::Maintenance.find_by(status: id) ? success = false : CRUD::Status.find(id).delete
+    CRUD::Maintenance.find_by(status: params[:id]) ? success = false : CRUD::Status.find(params[:id]).delete
 	when 'users'
-		CRUD::Maintenance.find_by(client: id ) || CRUD::Maintenance.find_by(executor: id ) ? success = false : CRUD::User.find(id).delete
+		CRUD::Maintenance.find_by(client: params[:id] ) || CRUD::Maintenance.find_by(executor: params[:id] ) ? success = false : CRUD::User.find(params[:id]).delete
     end
   if success == nil
 		$message = ["Запись успешно удалена!",
@@ -107,7 +108,10 @@ get '/tables/:table/:id/delete' do
 								"alert-danger"]
   end
 	$message[2] = true
-	redirect to "/tables/#{table}"
+	redirect to "/tables/#{params[:table]}"
+  else
+    erb :not_found
+  end
 end
 
 get '/about' do
@@ -124,7 +128,13 @@ get '/account' do
 end
 
 get '/visit' do
-  erb :visit
+  if !session[:identity]
+    erb :login
+  elsif CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Клиент'
+  	erb :visit
+  else
+    redirect to not_found
+  end
 end
 
 post '/account' do
@@ -151,7 +161,7 @@ post '/visit' do
   @reload = {defect: params[:Defect_Select].split[0].chomp, description: params[:Defect_Descr],
              client: CRUD::User.find_by(login: session[:identity]).id_user, bid_date: DateTime.now.strftime("%Y-%m-%d %H:%M:%S"),
              status: CRUD::Status.find_by(name: 'Не готово').id_status}
-	if @reload[:defectinfo] == ''
+	if params[:Defect_Descr] == ''
 		@message = ["alert-danger", "Заполните информацию о неисправности!"]
   else
     CRUD::Maintenance.create @reload
@@ -161,11 +171,16 @@ post '/visit' do
 end
 
 get '/tables/:table/new' do
+  if session[:identity]&&CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
 	@table = params[:table]
 	erb :insert
+  else
+    erb :not_found
+  end
 end
 
 post '/tables/:table/new' do
+  if session[:identity]&&CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
   @table = params[:table]
   case @table
   when 'pavilions'
@@ -258,9 +273,13 @@ post '/tables/:table/new' do
     end
   end
   erb :insert
+  else
+    erb :not_found
+  end
 end
 
 post '/tables/:table/:id/update' do
+  if session[:identity]&&CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
 	@table = params[:table]
   @id = params[:id]
 	case @table
@@ -322,11 +341,11 @@ post '/tables/:table/:id/update' do
 							 surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split[0].chomp('.'),
 							 pavilion: params[:Pavilion_Select].split[0].chomp('.')}
     case
-		when @reload[:login] == '' || @reload[:password] == '' || @reload[:name] == '' || @reload[:surname] == '' || @reload[:patronymic] == '' || @reload[:phone] == ''
+		when @reload[:password] == '' || @reload[:name] == '' || @reload[:surname] == '' || @reload[:patronymic] == '' || @reload[:phone] == ''
 			@message = ['alert-danger','Необходимо заполнить все поля!']
 		when CRUD::User.find_by(login: @reload[:login])
 			@message = ['alert-danger','Пользователь с таким логином уже существует в базе!']
-		when CRUD::User.find_by(phone: @reload[:phone])
+		when CRUD::User.find_by(phone: @reload[:phone]) && CRUD::User.find(@id).phone != @reload[:phone]
 			@message = ['alert-danger','Введенный вами номер телефона уже используется!']
 		when	((6..16).include? @reload[:password])
 			@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
@@ -345,14 +364,17 @@ post '/tables/:table/:id/update' do
 			@message = ['alert-danger','Описание не должно быть пустым или превышать 255 символов!']
 		else
 			CRUD::Maintenance.update(@id, @reload)
-			@reload = {}
-			@message = ['alert-success','Запись успешно обновлена!']
+      @reload = {}
 		end
 	end
-	erb :update
+  @message && @message[0] == 'alert-danger' ? (erb :update) : (redirect to "/tables/#{@table}")
+  else
+    erb :not_found
+  end
 end
 
 get '/tables/:table/:id/update' do
+  if session[:identity]&&CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
   @id = params[:id]
 	@table = params[:table]
 	case @table
@@ -368,10 +390,14 @@ get '/tables/:table/:id/update' do
 		@reload = CRUD::Status.find(@id)
 	when 'users'
 		@reload = CRUD::User.find(@id)
-	when 'maintenances'
-		@reload = CRUD::Maintenance.find(@id)
-	end
+  when 'maintenances'
+    @reload = CRUD::Maintenance.find(@id)
+    p @reload
+  end
 	erb :update
+  else
+    erb :not_found
+  end
 end
 
 get '/login' do
@@ -384,7 +410,11 @@ end
 
 
 post '/login' do
-	if  params[:pass] == CRUD::User.find_by(login: params[:login]).password
+  case
+  when params[:login] == '' || params[:pass] == ''
+    @access = "Заполните поля"
+    erb :login
+  when CRUD::User.find_by(login: params[:login]) && params[:pass] == CRUD::User.find_by(login: params[:login]).password
 		session[:identity] = params[:login]
 		erb "<div class='alert alert-success text-center'>Авторизация успешна!</div>"
 	else
