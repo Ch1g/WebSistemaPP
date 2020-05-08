@@ -4,6 +4,7 @@ set :database, "sqlite3:database/blohstreet.db"
 
 module CRUD
   class Defect < ActiveRecord::Base
+    validates :defect_name, presence: true
   end
 
   class Status < ActiveRecord::Base

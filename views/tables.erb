@@ -3,16 +3,16 @@
   <label for="select">Выберите таблицу:</label>
   <div class="btn-group">
     <button id="select" type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-      <%=@table %>  <span class="caret"></span>
+      <%=params[:value]%>  <span class="caret"></span>
     </button>
     <ul class="dropdown-menu">
       <% @tables.each do |item| %>
-          <li><a href="/tables/<%=item["name"] %>"><%=item["name"]%></a></li>
+          <li><a href="/tables/<%=item%>"><%=item%></a></li>
     <% end %>
     </ul>
   </div>
   <div class="form-group">
-    <%if @table == "pavilions" then %>
+    <%if params[:value] == "pavilions" then %>
     <label name="table_name">Павильоны</label>
     <table class="table table-hover table-bordered text-center">
     <thead>
@@ -31,14 +31,14 @@
         <td><%= row.square %></td>
         <td><%= row.floors %></td>
         <td><%= row.number %></td>
-        <td><a href="/tables/<%=@table%>/<%=row.id_pavilion%>/update"role="button" class="btn btn-warning">Изменить</a></td>
-        <td><a href="/tables/<%=@table%>/<%=row.id_pavilion%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+        <td><a href="/tables/<%=params[:value]%>/<%=row.id_pavilion%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+        <td><a href="/tables/<%=params[:value]%>/<%=row.id_pavilion%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
       </tr>
     <% end %>
     </tbody>
     </table>
     <%end %>
-    <%if @table == "defects" then %>
+    <%if params[:value] == "defects" then %>
       <label name="table_name">Типы неисправностей</label>
       <table class="table table-hover table-bordered text-center">
       <thead>
@@ -53,14 +53,14 @@
           <tr>
             <td><%= row.id_defect %></td>
             <td><%= row.defect_name %></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_defect%>/update"role="button" class="btn btn-warning">Изменить</a></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_defect%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_defect%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_defect%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
           </tr>
         <% end %>
         </tbody>
       </table>
     <%end %>
-      <%if @table == "users" then %>
+      <%if params[:value] == "users" then %>
       <label name="table_name">Пользователи</label>
       <table class="table table-hover table-bordered text-center">
       <thead>
@@ -92,14 +92,14 @@
             <td><%= CRUD::Post.find(row.post).name %></td>
             <td><%= CRUD::Pavilion.find(row.pavilion).number %></td>
 
-            <td><a href="/tables/<%=@table%>/<%=row.id_user%>/update"role="button" class="btn btn-warning">Изменить</a></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_user%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_user%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_user%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
           </tr>
         <% end %>
         </tbody>
       </table>
       <%end %>
-      <%if @table == "maintenances" then %>
+      <%if params[:value] == "maintenances" then %>
       <label name="table_name">Заявки на обслуживание</label>
       <table class="table table-hover table-bordered text-center">
       <thead>
@@ -126,14 +126,14 @@
             <td><%= row.end_date %></td>
             <td><%= CRUD::Defect.find(row.defect).defect_name %></td>
             <td><%= row.description %></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_maintenance%>/update" role="button" class="btn btn-warning">Изменить</a></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_maintenance%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_maintenance%>/update" role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_maintenance%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
           </tr>
         <% end %>
         </tbody>
       </table>
       <%end %>
-      <%if @table == "statuses" then %>
+      <%if params[:value] == "statuses" then %>
       <label name="table_name">Статусы заявок</label>
       <table class="table table-hover table-bordered text-center">
       <thead>
@@ -148,14 +148,14 @@
           <tr>
             <td><%= row.id_status %></td>
             <td><%= row.name %></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_status%>/update" role="button" class="btn btn-warning">Изменить</a></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_status%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_status%>/update" role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_status%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
           </tr>
         <% end %>
         </tbody>
       </table>
       <%end %>
-      <%if @table == "posts" then %>
+      <%if params[:value] == "posts" then %>
       <label name="table_name">Должности</label>
       <table class="table table-hover table-bordered text-center">
       <thead>
@@ -169,14 +169,14 @@
           <tr>
             <td><%= row.id_post %></td>
             <td><%= row.name %></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_post%>/update" role="button" class="btn btn-warning">Изменить</a></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_post%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_post%>/update" role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_post%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
           </tr>
         <% end %>
         </tbody>
       </table>
       <%end %>
-      <%if @table == "roles" then %>
+      <%if params[:value] == "roles" then %>
       <label name="table_name">Роли</label>
       <table class="table table-hover table-bordered text-center">
       <thead>
@@ -202,8 +202,8 @@
             <td><%= row.post %></td>
             <td><%= row.status %></td>
 
-            <td><a href="/tables/<%=@table%>/<%=row.id_role%>/update"role="button" class="btn btn-warning">Изменить</a></td>
-            <td><a href="/tables/<%=@table%>/<%=row.id_role%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_role%>/update"role="button" class="btn btn-warning">Изменить</a></td>
+            <td><a href="/tables/<%=params[:value]%>/<%=row.id_role%>/delete" role="button" class="btn btn-danger">Удалить</a></td>
           </tr>
         <% end %>
         </tbody>
@@ -216,6 +216,6 @@
         <%= $message[0] %>
       </div>
     <% end %>
-    <a type="submit" href="/tables/<%=@table%>/new" class="btn btn-primary center-block">Добавить запись</a>
+    <a type="submit" href="/tables/<%=params[:value]%>/new" class="btn btn-primary center-block">Добавить запись</a>
   </div>
 </form>
