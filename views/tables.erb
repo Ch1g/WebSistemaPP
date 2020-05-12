@@ -118,7 +118,7 @@
         <tbody>
         <% CRUD::Maintenance.all.each do |row| %>
           <tr>
-            <td><%= row.id_maintenance %></td>
+            <td><a href="/tables/maintenances/<%=row.id_maintenance%>/report"><%= row.id_maintenance %></a></td>
             <td><%=client = CRUD::User.find(row.client); "#{client.name} #{client.surname}, #{client.phone}" %></td>
             <td><%= CRUD::Status.find(row.status).name %></td>
             <td><%= row.executor ? begin executor = CRUD::User.find(row.executor); string = "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" end : '' %></td>

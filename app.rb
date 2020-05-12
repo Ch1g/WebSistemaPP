@@ -4,6 +4,7 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'sinatra/activerecord'
 require './crud'
+require './pdf'
 
 configure do
 	enable :sessions
@@ -135,11 +136,25 @@ post '/visit' do
 		@message = ["alert-danger", "Заполните информацию о неисправности!"]
   else
     CRUD::Maintenance.create(defect: params[:Defect_Select].split[0].chomp, description: params[:Defect_Descr],
-        client: CRUD::User.find_by(login: session[:identity]).id_user, bid_date: DateTime.now.strftime("%Y-%m-%d %H:%M:%S"),
+        client: CRUD::User.find_by(login: session[:identity]).id_user, bid_date: DateTime.now.strftime("%Y-%m-%d"),
         status: CRUD::Status.find_by(name: 'Не готово').id_status)
 		@message = ["alert-success", "Спасибо! Ваша заявка принята в обработку."]
   end
 	erb :visit
+end
+
+get '/tables/maintenances/:id/download' do
+  if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор' or
+      CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).id_user == CRUD::Maintenance.find(params[:id]).client
+    line = CRUD::Maintenance.find(params[:id])
+		client = CRUD::User.find(line.client);
+    PDF::File.to_pdf(line.id_maintenance, line.bid_date.to_s, line.end_date.to_s,
+                     "#{client.name} #{client.surname}, #{client.phone}",
+										 line.executor ? begin executor = CRUD::User.find(line.executor); "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" end : '',
+                     CRUD::Status.find(line.status).name, CRUD::Defect.find(line.defect).defect_name,
+                     line.description)
+    send_file PDF::File.get_pdf, :filename => PDF::File.get_pdf, :type => 'Application/octet-stream'
+  end
 end
 
 get '/tables/:table/new' do
@@ -283,6 +298,13 @@ post '/tables/:table/:id/update' do
 			redirect to "/tables/#{params[:table]}"
 		end
   end
+  end
+end
+
+get "/tables/maintenances/:id/report" do
+	if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор' or
+			CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).id_user == CRUD::Maintenance.find(params[:id]).client
+    erb :info
   end
 end
 

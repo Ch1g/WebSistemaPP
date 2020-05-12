@@ -1,0 +1,17 @@
+<h2>Информация о заявке №<%=params[:id]%></h2>
+<%line = CRUD::Maintenance.find(params[:id])%>
+<div class="form-group">
+  <div class="col-xs-6">
+    <h4>Дата подачи: <%=line.bid_date %></h4>
+    <h4>Дата завершения: <%=line.end_date %></h4>
+    <h4>Клиент: <%= client = CRUD::User.find(line.client); "#{client.name} #{client.surname}, #{client.phone}" %></h4>
+    <h4>Исполнитель: <%=line.executor ? begin executor = CRUD::User.find(line.executor); string = "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" end : '' %></h4>
+    <h4>Статус: <%= CRUD::Status.find(line.status).name  %></h4>
+    <h4>Неисправность: <%= CRUD::Defect.find(line.defect).defect_name  %></h4>
+    <h4>Описание: <%=line.description%></h4>
+  </div>
+  <div class="col-xs-12">
+    <a href="/tables/maintenances" role="button" class="btn btn-primary">Назад</a>
+    <a href="/tables/maintenances/<%=line.id_maintenance%>/download" role="button" class="btn btn-danger">Сформировать отчет</a>
+  </div>
+</div>
