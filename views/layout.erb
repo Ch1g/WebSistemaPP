@@ -36,7 +36,7 @@
 						<li><a href="/about">Информация</a></li>
 						<%= session[:identity] && CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Клиент' ? '<li><a href="/visit">Оставить заявку</a></li>' : '' %>
 						<%=session[:identity] ? '<li><a href="/account">Профиль</a> </li>' : '' %>
-						<%= session[:identity] && CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name != 'Клиент' ? '<li><a href="/tables/pavilions">Данные</a></li>' : ''%>
+						<%= session[:identity] && CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор' ? '<li><a href="/tables/pavilions">Данные</a></li>' : ''%>
 			    </ul>
 					<ul class="nav navbar-nav navbar-right">
 						<li class="dropdown">

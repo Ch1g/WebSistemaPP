@@ -48,7 +48,7 @@ post '/registration' do
 		CRUD::User.create [login: params[:User_Login], password: params[:User_Password], role: CRUD::Role.find_by(name: 'Клиент').id_role,
 				name: params[:User_Name], surname: params[:User_Surname], patronymic: params[:User_Patronymic],
 				phone: params[:User_Phone], post: CRUD::Post.find_by(name: 'Клиент').id_post,
-				pavilion: params[:Pavilion_Select].split[0].chomp('.')]
+				pavilion: params[:Pavilion_Select].split('.')[0]]
 		@message = ['alert-success','Регистрация успешна!']
   end
   erb :registration
@@ -102,6 +102,7 @@ get '/about' do
 end
 
 get '/account' do
+	@last = "Bids"
 	session[:identity] ? (erb :account) : (redirect to('/login'))
 end
 
@@ -135,7 +136,7 @@ post '/visit' do
 	if params[:Defect_Descr] == ''
 		@message = ["alert-danger", "Заполните информацию о неисправности!"]
   else
-    CRUD::Maintenance.create(defect: params[:Defect_Select].split[0].chomp, description: params[:Defect_Descr],
+    CRUD::Maintenance.create(defect: params[:Defect_Select].split('.')[0], description: params[:Defect_Descr],
         client: CRUD::User.find_by(login: session[:identity]).id_user, bid_date: DateTime.now.strftime("%Y-%m-%d"),
         status: CRUD::Status.find_by(name: 'Не готово').id_status)
 		@message = ["alert-success", "Спасибо! Ваша заявка принята в обработку."]
@@ -144,22 +145,27 @@ post '/visit' do
 end
 
 get '/tables/maintenances/:id/download' do
-  if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор' or
-      CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).id_user == CRUD::Maintenance.find(params[:id]).client
-    line = CRUD::Maintenance.find(params[:id])
-		client = CRUD::User.find(line.client);
-    PDF::File.to_pdf(line.id_maintenance, line.bid_date.to_s, line.end_date.to_s,
-                     "#{client.name} #{client.surname}, #{client.phone}",
-										 line.executor ? begin executor = CRUD::User.find(line.executor); "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" end : '',
-                     CRUD::Status.find(line.status).name, CRUD::Defect.find(line.defect).defect_name,
-                     line.description)
+	user = CRUD::User.find_by(login: session[:identity])
+	line = CRUD::Maintenance.find(params[:id])
+	client = CRUD::User.find(line.client)
+  if (CRUD::Status.find(line.status).name == 'Готово' || CRUD::Status.find(line.status).name == 'Ждёт оценки') &&
+      (CRUD::Role.find(CRUD::User.find(user.id).role).name == 'Администратор'||'Менеджер')
+   	CRUD::Maintenance.update(params[:id], status: CRUD::Status.find_by(name: 'Готово').id, end_date: DateTime.now.strftime("%Y-%m-%d")) if CRUD::Status.find(line.status).name == 'Ждёт оценки'
+		PDF::File.to_pdf(line.id, line.try(:bid_date).try(:strftime, ("%Y-%m-%d")).to_s,
+                     line.try(:end_date).try(:strftime, ("%Y-%m-%d")).to_s, "#{client.name} #{client.surname}, #{client.phone}",
+                     line.executor ? begin executor = CRUD::User.find(line.executor); "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" end : '',
+                     CRUD::Status.find(line.status).name, CRUD::Defect.find(line.defect).defect_name, line.description,
+                     CRUD::Maintenance.where(client: line.client).length, CRUD::Maintenance.all.length,
+                     CRUD::Maintenance.where(defect: line.defect).length,CRUD::Maintenance.where(defect: line.defect, client: line.client).length,
+                     CRUD::Maintenance.where(bid_date: line.bid_date).length, CRUD::Maintenance.where(bid_date: line.bid_date, defect: line.defect).length)
     send_file PDF::File.get_pdf, :filename => PDF::File.get_pdf, :type => 'Application/octet-stream'
+  else
+    $message = ['alert-danger','Заявка не завершена!']
   end
 end
 
 get '/tables/:table/new' do
-  if session[:identity]&&CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
-	@table = params[:table]
+  if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'
 	erb :insert
   else
     erb :not_found
@@ -208,17 +214,17 @@ post '/tables/:table/new' do
     when	((6..16).include? params[:User_Password])
 			@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
 		else
-			CRUD::User.create(login: params[:User_Login], password: params[:User_Password], role: params[:Role_Select].split[0].chomp('.'), name: params[:User_Name],
-												surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split[0].chomp('.'),
-												pavilion: params[:Pavilion_Select].split[0].chomp('.'))
+			CRUD::User.create(login: params[:User_Login], password: params[:User_Password], role: params[:Role_Select].split('.')[0], name: params[:User_Name],
+												surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split('.')[0],
+												pavilion: params[:Pavilion_Select].split('.')[0])
     end
   when 'maintenances'
     if params[:Maintenance_Descr].length > 255
 			@message = ['alert-danger','Описание не должно быть пустым или превышать 255 символов!']
     else
-			CRUD::Maintenance.create(status: params[:Status_Select].split[0].chomp('.'), executor: params[:Executor_Select].split[0].chomp('.'),
-					client: params[:Client_Select].split[0].chomp('.'), bid_date: params[:Date_Bid], end_date: params[:Date_End],
-					defect: params[:Defect_Select].split[0].chomp('.'), description: params[:Maintenance_Descr])
+			CRUD::Maintenance.create(status: params[:Status_Select].split('.')[0], executor: params[:Executor_Select].split('.')[0],
+					client: params[:Client_Select].split('.')[0], bid_date: params[:Date_Bid], end_date: params[:Date_End],
+					defect: params[:Defect_Select].split('.')[0], description: params[:Maintenance_Descr])
     end
   end
   redirect to "tables/#{params[:table]}"
@@ -277,9 +283,9 @@ post '/tables/:table/:id/update' do
 			@message = ['alert-danger','Пароль должен содержать от 6 до 16 символов!']
       erb :update
 		else
-			CRUD::User.update(params[:id], password: params[:User_Password], role: params[:Role_Select].split[0].chomp('.'), name: params[:User_Name],
-												surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split[0].chomp('.'),
-												pavilion: params[:Pavilion_Select].split[0].chomp('.'))
+			CRUD::User.update(params[:id], password: params[:User_Password], role: params[:Role_Select].split('.')[0], name: params[:User_Name],
+												surname: params[:User_Surname], patronymic: params[:User_Patronymic], phone: params[:User_Phone], post: params[:Post_Select].split('.')[0],
+												pavilion: params[:Pavilion_Select].split('.')[0])
 			$message = ["Запись успешно изменена!", "alert-success", true]
 			redirect to "/tables/#{params[:table]}"
 		end
@@ -291,9 +297,9 @@ post '/tables/:table/:id/update' do
 			@message = ['alert-danger','Описание не должно быть пустым или превышать 255 символов!']
 			erb :update
 		else
-			CRUD::Maintenance.update(params[:id], status: params[:Status_Select].split[0].chomp('.'), executor: params[:Executor_Select].split[0].chomp('.'),
-															 client: params[:Client_Select].split[0].chomp('.'), bid_date: params[:Date_Bid], end_date: params[:Date_End],
-															 defect: params[:Defect_Select].split[0].chomp('.'), description: params[:Maintenance_Descr])
+			CRUD::Maintenance.update(params[:id], status: params[:Status_Select].split('.')[0], executor: params[:Executor_Select].split('.')[0],
+															 client: params[:Client_Select].split('.')[0], bid_date: params[:Date_Bid], end_date: params[:Date_End],
+															 defect: params[:Defect_Select].split('.')[0], description: params[:Maintenance_Descr])
 			$message = ["Запись успешно изменена!", "alert-success", true]
 			redirect to "/tables/#{params[:table]}"
 		end
@@ -302,10 +308,29 @@ post '/tables/:table/:id/update' do
 end
 
 get "/tables/maintenances/:id/report" do
-	if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор' or
-			CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).id_user == CRUD::Maintenance.find(params[:id]).client
-    erb :info
+	user = CRUD::User.find_by(login: session[:identity])
+	if CRUD::Role.find(CRUD::User.find(user.id).role).name == 'Администратор'||'Менеджер' or
+	  user.id == CRUD::Maintenance.find(params[:id]).client || CRUD::Maintenance.find(params[:id]).executor
+  erb :info
+  else
+    erb :not_found
   end
+end
+
+post "/tables/maintenances/:id/report" do
+	user = CRUD::User.find_by(login: session[:identity])
+	if CRUD::Role.find(CRUD::User.find(user.id).role).name == 'Менеджер'
+    CRUD::Maintenance.update(params[:id], executor: params[:Executor_Select].split('.')[0])
+  elsif CRUD::Role.find(CRUD::User.find(user.id).role).name == 'Исполнитель'
+    CRUD::Maintenance.update(params[:id],status: params[:Status_Select].split('.')[0])
+  elsif (CRUD::Role.find(CRUD::User.find(user.id).role).name == 'Клиент') && (CRUD::Status.find(CRUD::Maintenance.find(params[:id]).status).name == 'Требует уточнения')
+		if params[:Defect_Descr] == '' or params[:Defect_Descr].length > 255
+      $message = ['alert-danger','Описание не должно быть пустым или превышать 255 символов!']
+    else
+      CRUD::Maintenance.update(params[:id], description: params[:Defect_Descr], status: CRUD::Status.find_by(name: 'В исполнении').id)
+    end
+  end
+  erb :info
 end
 
 get '/tables/:table/:id/update' do

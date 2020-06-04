@@ -1,17 +1,45 @@
-<h2>Информация о заявке №<%=params[:id]%></h2>
+<a href="/account">Назад</a>
 <%line = CRUD::Maintenance.find(params[:id])%>
+<form action="/tables/maintenances/<%=params[:id] %>/report" method="POST">
 <div class="form-group">
   <div class="col-xs-6">
-    <h4>Дата подачи: <%=line.bid_date %></h4>
-    <h4>Дата завершения: <%=line.end_date %></h4>
+    <h2>Информация о заявке №<%=params[:id]%></h2>
+    <h4>Дата подачи: <%=line.try(:bid_date).try(:strftime, ("%Y-%m-%d")) %></h4>
+    <h4>Дата завершения: <%=line.try(:end_date).try(:strftime, ("%Y-%m-%d")) %></h4>
     <h4>Клиент: <%= client = CRUD::User.find(line.client); "#{client.name} #{client.surname}, #{client.phone}" %></h4>
-    <h4>Исполнитель: <%=line.executor ? begin executor = CRUD::User.find(line.executor); string = "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" end : '' %></h4>
-    <h4>Статус: <%= CRUD::Status.find(line.status).name  %></h4>
+    <%if CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Менеджер'&&!line.executor then%>
+      <h4 for="Executor_Select">Выберите исполнителя:</h4>
+      <select id="Executor_Select" class="form-control" name="Executor_Select">
+        <% CRUD::User.where(role: CRUD::Role.find_by(name: "Исполнитель").id_role).each do |item| %>
+          <option <%=params[:Executor_Select] && params[:Executor_Select].split[0].chomp('.').to_i == item.id_user ? 'selected' : ''%>><%="#{item.id_user}. #{item.name} #{item.surname} - #{CRUD::Post.find(item.post).name}"%></option>
+        <%end%>
+      </select>
+      <%else %>
+        <h4>Исполнитель: <%=line.executor ? begin executor = CRUD::User.find(line.executor); string = "#{executor.name} #{executor.surname}, #{CRUD::Post.find(executor.post).name}, #{executor.phone}" end : '' %></h4>
+      <%end %>
+    <%if (CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Исполнитель') then%>
+      <h4 for="Status_Select">Выберите статус: </h4>
+      <select type="text" id="Status_Select" class="form-control" name="Status_Select">
+        <% CRUD::Status.where("name = 'Требует уточнения' or name = 'Ждёт оценки' or name = 'В исполнении'").each do |item| %>
+          <option <%=line.status.to_i == item.id_status ? 'selected' : ''%>><%="#{item.id_status}. #{item.name}"%></option>
+        <%end%>
+      </select>
+    <%else %>
+    <h4>Статус: <%= CRUD::Status.find(line.status).name  %></h4><%end %>
     <h4>Неисправность: <%= CRUD::Defect.find(line.defect).defect_name  %></h4>
-    <h4>Описание: <%=line.description%></h4>
-  </div>
-  <div class="col-xs-12">
-    <a href="/tables/maintenances" role="button" class="btn btn-primary">Назад</a>
-    <a href="/tables/maintenances/<%=line.id_maintenance%>/download" role="button" class="btn btn-danger">Сформировать отчет</a>
+    <%if (CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name) == 'Клиент' &&
+          (CRUD::Status.find(line.status).name == 'Требует уточнения') then%>
+      <div class="form-group">
+        <label for="Defect_Descr">Уточните проблему:</label>
+        <textarea id="Defect_Descr" class="form-control" rows="3" name="Defect_Descr" placeholder="Информация о проблеме"><%=line.description %></textarea>
+      </div>
+    <%else %>
+        <h4>Описание: <%=line.description%></h4>
+    <%end %>
+    <%=CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор'||'Менеджер' ?
+          "<a href='/tables/maintenances/#{line.id_maintenance}/download' role='button' class='btn btn-danger'>Сформировать отчет</a>" : '' %>
+    <%=CRUD::Role.find(CRUD::User.find_by(login: session[:identity]).role).name == 'Администратор' ? '' :
+          '<input type="submit" class="btn btn-primary" value="Сохранить изменения">'%>
   </div>
 </div>
+    </form>

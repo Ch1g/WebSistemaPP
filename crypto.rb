@@ -1,5 +1,5 @@
   class AES
-    require "openssl"
+    require 'openssl'
     require 'digest/sha2'
     require 'base64'
 

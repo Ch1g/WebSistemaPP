@@ -10,3 +10,6 @@ public/jquery.simplecolorpicker.js
 public/jquery.simplecolorpicker.css
 public/jquery.simplecolorpicker.js
 public/jquery.simplecolorpicker.css
+/reports/
+
+.gitignore

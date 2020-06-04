@@ -30,7 +30,7 @@
             <li class="list-group-item text-right"><span class="pull-left"><strong>В исполнении</strong></span> <%=CRUD::Maintenance.where(executor: user.id_user, status: CRUD::Status.find_by(name: 'В исполнении').id_status).count %></li>
             <li class="list-group-item text-right"><span class="pull-left"><strong>Готовые</strong></span> <%=CRUD::Maintenance.where(executor: user.id_user, status: CRUD::Status.find_by(name: 'Готово').id_status).count %></li>
             <% end %>
-        <%if CRUD::Role.find(user.role).name == 'Менеджер по заявкам' %>
+        <%if CRUD::Role.find(user.role).name == ('Менеджер'||'Администратор') %>
           <li class="list-group-item text-muted">Заявки на ТО <i class="fa fa-dashboard fa-1x"></i></li>
           <li class="list-group-item text-right"><span class="pull-left"><strong>Все</strong></span> <%=CRUD::Maintenance.all.count %></li>
           <li class="list-group-item text-right"><span class="pull-left"><strong>Готовые</strong></span> <%=CRUD::Maintenance.where(status: CRUD::Status.find_by(name: 'Готово').id_status).count %></li>
@@ -47,11 +47,30 @@
         <li <%=@last == 'Bids' ? 'class = "active"' : '' %>><a href="#messages" data-toggle="tab">Управление заявками</a></li>
         <li <%=@last == 'Settings' ? 'class = "active"' : '' %>><a href="#settings" data-toggle="tab">Управление аккаунтом</a></li>
       </ul>
-
       <div class="tab-content">
         <div class="tab-pane <%=@last == 'Bids' ? 'active' : '' %>" id="messages">
           <ul class="list-group">
             <li class="list-group-item text-muted">Заявки</li>
+
+            <%case CRUD::Role.find(user.role).name
+            when 'Менеджер','Администратор'%>
+                <%CRUD::Maintenance.all.reverse.each do |row| %>
+                <li class="list-group-item"><%=row.id%>. Тип: <%=CRUD::Defect.find(row.defect).defect_name%>.
+                  Дата подачи: <%=row.bid_date.strftime("%Y-%m-%d")%>. Статус: <%=CRUD::Status.find(row.status).name%>. Описание: <%=row.description.first(30)%>...
+                  <a href="/tables/maintenances/<%=row.id_maintenance%>/report" class="glyphicon glyphicon-circle-arrow-right"></a></li>
+              <% end %>
+            <%when 'Клиент'%>
+               <%CRUD::Maintenance.where(client: user.id).reverse.each do |row|%>
+                <li class="list-group-item"><%=row.id%>. Тип: <%=CRUD::Defect.find(row.defect).defect_name%>.
+                  Дата подачи: <%=row.bid_date.strftime("%Y-%m-%d")%>. Статус: <%=CRUD::Status.find(row.status).name%>. Описание: <%=row.description.first(30)%>...
+                  <a href="/tables/maintenances/<%=row.id_maintenance%>/report" class="glyphicon glyphicon-circle-arrow-right"></a></li>
+               <% end %>
+            <%when 'Исполнитель'%>
+                <%CRUD::Maintenance.where(executor: user.id).reverse.each do |row|%>
+                <li class="list-group-item"><%=row.id%>. Тип: <%=CRUD::Defect.find(row.defect).defect_name%>.
+                  Дата подачи: <%=row.bid_date.strftime("%Y-%m-%d")%>. Статус: <%=CRUD::Status.find(row.status).name%>. Описание: <%=row.description.first(30)%>...
+                  <a href="/tables/maintenances/<%=row.id_maintenance%>/report" class="glyphicon glyphicon-circle-arrow-right"></a></li>
+              <% end %><% end %>
           </ul>
 
         </div>
